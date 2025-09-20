@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tasks    Task[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  title     String
+  status    TaskStatus @default(TODO)
+  isPriority Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tasks")
+}
+
+model Session {
+  id              String   @id @default(cuid())
+  date            DateTime @default(now())
+  focusMinutes    Int      @default(0)
+  cyclesCompleted Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum TaskStatus {
+  TODO
+  DOING
+  DONE
+}
